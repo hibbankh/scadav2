@@ -1,0 +1,11 @@
+# **/.env
+cmd.exe
+node_modules
+core-framework
+framework
+tmp
+docker/mqtt5
+!docker/.env
+!docker/docker-compose.yaml
+!docker/envs/*
+main

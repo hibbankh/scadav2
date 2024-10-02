@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:  
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: ${DB_SCHEMA}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+    ports:
+      - 5432:${DB_PORT}
+    restart: on-failure:3
+
+  backend:
+    container_name: backend
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    build:
+      context: ../.
+      dockerfile: Dockerfile
+    ports:
+      - ${OUT_PORT}:${OUT_PORT}
+      - ${IN_PORT}:${IN_PORT}
+    restart: on-failure:3
+
+  pgweb:
+    container_name: pgweb
+    image: sosedoff/pgweb
+    depends_on:
+      - postgres
+    environment:
+      PGWEB_DATABASE_URL: postgres://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?sslmode=disable
+    ports:
+      - 8085:8081
+    restart: on-failure:3
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    command: redis-server
+    volumes:
+      - redis:/var/lib/redis
+      - redis-config:/usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+    networks:
+      - network-stack
+
+  redis-commander:
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - HTTP_USER=root
+      - HTTP_PASSWORD=qwerty
+    ports:
+      - 8081:8081
+    networks:
+      - network-stack
+    depends_on:
+      - redis
+  
+  # mqtt5 eclipse-mosquitto
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mqtt5/config:/mosquitto/config:rw
+      - ./mqtt5/data:/mosquitto/data:rw
+      - ./mqtt5/log:/mosquitto/log:rw
+    restart: unless-stopped
+
+volumes:
+  redis:
+  redis-config:
+  config:
+  data:
+  log:
+
+networks:
+  network-stack:
+    driver: bridge

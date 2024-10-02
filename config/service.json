@@ -1,0 +1,29 @@
+{
+  "database": {
+    "default": {
+      "driver": "DB_DRIVER",
+      "host": "DB_HOST",
+      "port": "DB_PORT",
+      "user": "DB_USER",
+      "pass": "DB_PASS",
+      "schema": "DB_SCHEMA",
+      "timezone": "DB_TIMEZONE",
+      "ssl": "DB_SSL",
+      "auto-migrate":true,
+      "enable": true
+    },
+    "other": []
+  },
+  "mqtt": {
+    "default": {
+      "host": "MQ_HOST",
+      "port": "MQ_PORT",
+      "user": "MQ_USER",
+      "pass": "MQ_PASS",
+      "tls_path": "MQ_TLS_PATH",
+      "enable": true
+    },
+    "other": []
+  },
+  "cron": false
+}
